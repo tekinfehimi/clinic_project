@@ -30,7 +30,7 @@ pdfreader==0.1.12
 peppercorn==0.6
 pipenv==2023.10.24
 platformdirs==3.11.0
-psycopg2==2.9.9
+psycopg2-binary==2.9.9
 pycryptodome==3.20.0
 pydub==0.25.1
 pyparsing==3.1.2
