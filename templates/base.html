@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <link href="{% static 'css/create_appointment.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
+    
+
+</head>
+<body>
+
+<div class="d-flex">
+    {% block navbar %}
+    <nav class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
+        <!-- <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="fas fa-chevron-left"></i>
+        </button> -->
+
+        <div class="p-4">
+            <!-- <img src="{% static 'img/logo.png' %}" width="150px;" height="100px;" alt="main_logo" /> -->
+            <h4 class="logo-text fw-bold mb0">MED X DENT</h4>
+            <!-- <p class="text-muted small hide-on-collapse">Dashboard</p> -->
+        </div>
+     
+
+        <div class="nav flex-column">
+            <!-- <a href="#" class="sidebar-link text-decoration-none p-3">
+                <i class="fas fa-home me-3"></i>
+                <span class="hide-on-collapse">Əsas</span>
+            </a> -->
+            <a href="{% url 'service-list' %}" class="sidebar-link text-decoration-none p-3 {% block active_services %}{% endblock %}">
+                <i class="fas fa-box me-3"></i>
+                <span class="hide-on-collapse">Xidmətlər</span>
+            </a>
+            <a href="{% url 'queue-list' %}" class="sidebar-link text-decoration-none p-3 {% block active_queue %}{% endblock %}">
+                <i class="fas fa-clock me-3"></i>
+                <span class="hide-on-collapse">Növbə</span>
+            </a>
+            <a href="{% url 'appointment-list' %}" class="sidebar-link text-decoration-none p-3 {% block active_appointments %}{% endblock %}">
+                <i class="fas fa-calendar-check me-3"></i>
+                <span class="hide-on-collapse">Görüşlər</span>
+            </a>
+            <a href="{% url 'patient-list' %}" class="sidebar-link text-decoration-none p-3 {% block active_patients %}{% endblock %} ">
+                <i class="fas fa-users me-3"></i>
+                <span class="hide-on-collapse">Pasiyentlər</span>
+            </a>
+            <a href="{% url 'doctor-report' %}" class="sidebar-link text-decoration-none p-3 {% block active_doctor_report %}{% endblock %}">
+                <i class="fas fa-chart-line me-3"></i>
+                <span class="hide-on-collapse">Həkim Hesabatı</span>
+            </a>
+            
+            
+        </div>
+
+        <!-- <div class="profile-section mt-auto p-4">
+            <div class="d-flex align-items-center">
+                <img src="https://randomuser.me/api/portraits/women/70.jpg" style="height:60px" class="rounded-circle" alt="Profile">
+                <div class="ms-3 profile-info">
+                    <h6 class="text-white mb-0">Alex Morgan</h6>
+                    <small class="text-muted">Admin</small>
+                </div>
+            </div>
+        </div> -->
+    </nav>
+    {% endblock navbar %}
+    
+    <main class="main-content">
+        <div class="container-fluid">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+    </main>
+
+</div>
+
+</body>
+<script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+</html>
+

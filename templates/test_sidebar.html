@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Sidebar</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --sidebar-width: 260px;
+      --sidebar-width-collapsed: 80px;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      font-family: sans-serif;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(135deg, #1a1c2e 0%, #16181f 100%);
+      color: #fff;
+      transition: width 0.3s ease;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-width-collapsed);
+    }
+
+    .toggle-btn {
+      margin: 20px auto;
+      background: white;
+      color: black;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: #a0a3bd;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .nav-link i {
+      font-size: 18px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .nav-link span {
+      display: none;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <button class="toggle-btn" onclick="toggleSidebar()">≡</button>
+
+  <a href="#" class="nav-link">
+    <i class="fas fa-home"></i>
+    <span>Əsas</span>
+  </a>
+  <a href="#" class="nav-link">
+    <i class="fas fa-calendar-check"></i>
+    <span>Görüşlər</span>
+  </a>
+  <a href="#" class="nav-link">
+    <i class="fas fa-users"></i>
+    <span>Pasiyentlər</span>
+  </a>
+  <a href="#" class="nav-link">
+    <i class="fas fa-chart-line"></i>
+    <span>Hesabat</span>
+  </a>
+</div>
+
+<div class="content">
+  <h1>İçerik sahəsi</h1>
+</div>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+  }
+</script>
+
+</body>
+</html>

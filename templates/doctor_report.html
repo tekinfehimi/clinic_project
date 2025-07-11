@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block active_doctor_report %}active{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Həkimlər üzrə Hesabat</h2>
+
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+      <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="col-md-3">
+      <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary">Filtrlə</button>
+    </div>
+  </form>
+
+  <table class="table table-bordered table-hover align-middle">
+    <thead>
+      <tr>
+        <th>Həkim</th>
+        <th>Pasiyent sayı</th>
+        <th>Gəlir (₼)</th>
+        <th>Detallar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in doctor_data %}
+      <tr>
+        <td>Dr. {{ item.doctor.first_name }} {{ item.doctor.last_name }}</td>
+        <td>{{ item.patient_count }}</td>
+        <td>{{ item.income|floatformat:2 }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#details-{{ forloop.counter }}">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </td>
+      </tr>
+      <tr class="collapse" id="details-{{ forloop.counter }}">
+        <td colspan="4">
+          <table class="table table-sm table-bordered mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Pasiyent</th>
+                <th>Xidmət</th>
+                <th>Qiymət</th>
+                <th>Ödənilən Məbləğ</th>
+                <th>Tarix</th>
+                <th>Saat</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for appt in item.appointments %}
+              <tr>
+                <td>{{ appt.patient.first_name }} {{ appt.patient.last_name }}</td>
+                <td>{{ appt.service.name }}</td>
+                <td>{{ appt.service.price }} ₼</td>
+                <td>
+                  {{ appt.paid_amount|default_if_none:"0.00" }} ₼
+                  {% if appt.is_completed %}
+                    <i class="fas fa-check-circle text-success ms-2" title="Tamamlanıb"></i>
+                  {% else %}
+                    <i class="fas fa-times-circle text-danger ms-2" title="Tamamlanmayıb"></i>
+                  {% endif %}
+                </td>
+                <td>{{ appt.appointment_date }}</td>
+                <td>{{ appt.appointment_time|time:"H:i" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6">Xidmət yoxdur.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

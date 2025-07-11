@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block active_services %}active{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Xidmətlər Siyahısı</h2>
+  <div class="mb-3">
+    <input type="text" id="searchService" class="form-control" placeholder="Axtar...">
+  </div>  
+  <div class="d-flex justify-content-between mb-3">
+    <a href="{% url 'add-service' %}" class="btn btn-primary">+ Yeni Xidmət</a>
+  </div>
+
+  <table class="table align-middle mb-0 bg-white">
+    <thead class="bg-light">
+      <tr>
+        <th></th>
+        <th>Xidmət</th>
+        <th>Ətraflı</th>
+        <th>Qiymət</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for service in services %}
+      <tr>
+        <td>{{ forloop.counter }}.</td>
+        <td>{{ service.name }}</td>
+        
+        <td>
+          {% with detail=service.detail %}
+            {% if detail and detail|length > 20 %}
+              <span class="short-text">{{ detail|slice:":20" }}...</span>
+              <span class="full-text d-none">{{ detail }}</span>
+              <a href="#" class="toggle-text btn btn-sm btn-link p-0">Daha çox</a>
+            {% else %}
+              <span>{{ detail|default:"—" }}</span>
+            {% endif %}
+          {% endwith %}
+        </td>
+        <td>{{ service.price }} ₼</td>
+        <td>
+          <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Axtarış funksiyası
+  document.getElementById('searchService').addEventListener('keyup', function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+      const rowText = row.innerText.toLowerCase();
+      row.style.display = rowText.includes(searchValue) ? '' : 'none';
+    });
+  });
+
+  // "Daha çox / Daha az" funksiyası
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggles = document.querySelectorAll('.toggle-text');
+
+    toggles.forEach(function (toggle) {
+      toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        const container = this.closest('td');
+        const shortText = container.querySelector('.short-text');
+        const fullText = container.querySelector('.full-text');
+
+        if (fullText.classList.contains('d-none')) {
+          shortText.classList.add('d-none');
+          fullText.classList.remove('d-none');
+          this.textContent = 'Daha az';
+        } else {
+          shortText.classList.remove('d-none');
+          fullText.classList.add('d-none');
+          this.textContent = 'Daha çox';
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

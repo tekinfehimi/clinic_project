@@ -1,0 +1,108 @@
+
+{% extends 'base.html' %}
+{% block active_patients %}active{% endblock %}
+{% block content %}
+<h2>Pasiyent siyahısı</h2>
+<div class="mb-3">
+  <input type="text" id="searchInput" class="form-control" placeholder="Axtar...">
+</div>
+<a href="{% url 'add-patient' %}" class="btn btn-primary">+ Yeni Pasiyent</a>
+<br>
+<br>
+<table class="table align-middle mb-0 bg-white">
+  <thead class="bg-light">
+    <tr>
+      <th></th>
+      <th>Ad / Soyad</th>
+      <th>Mobil nömrə</th>
+      <th>Qeydiyyat tarixi</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for patient in patients %}
+      <tr>
+        <td>{{ forloop.counter }}.</td>
+        <td>
+          <div class="d-flex align-items-center">
+            <!-- <img
+                src="https://mdbootstrap.com/img/new/avatars/8.jpg"
+                alt=""
+                style="width: 45px; height: 45px"
+                class="rounded-circle"
+            /> -->
+            <div class="ms-3">
+              <p class="fw-bold mb-1">{{ patient.first_name }} {{ patient.last_name }}</p>
+              <p class="text-muted mb-0">{{ patient.fin_code }}</p>
+            </div>
+          </div>
+        </td>
+        <td>
+          <p class="fw-normal mb-1"> 
+            {% if patient.phone_prefix == "Aze1" %}
+                (050)
+            {% elif patient.phone_prefix == "Aze2" %}
+                (051)
+            {% elif patient.phone_prefix == "Aze3" %}
+                (010)
+            {% elif patient.phone_prefix == "Bak1" %}
+                (055)
+            {% elif patient.phone_prefix == "Bak2" %}
+                (099)
+            {% elif patient.phone_prefix == "Nar1" %}
+                (070)
+            {% elif patient.phone_prefix == "Nar2" %}
+                (077)
+            {% endif %}
+            {{ patient.phone_number }}
+          </p>
+        </td>
+        <td>{{ patient.created_at|date:"d.m.Y" }}</td>
+        <td>
+          <div class="btn-group dropstart">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              Xidmətlər
+            </button>
+            <ul class="dropdown-menu">
+              {% if patient.appointment_set.all %}
+                {% for app in patient.appointment_set.all %}
+                  <li>
+                    <span class="dropdown-item">
+                      📅 {{ app.appointment_date|date:"d.m.Y" }} – 🧑‍⚕️ {{ app.doctor.first_name }} {{ app.doctor.last_name }} – 💼 {{ app.service.name }}
+                    </span>
+                  </li>
+                {% endfor %}
+                <li><hr class="dropdown-divider"></li>
+                <li><span class="dropdown-item text-muted">Cəmi {{ patient.appointment_set.count }} xidmət</span></li>
+              {% else %}
+                <li><span class="dropdown-item text-muted">Xidmət yoxdur</span></li>
+              {% endif %}
+            </ul>
+          </div>
+
+
+        </td>
+      </tr>
+      {% endfor %}
+        
+  </tbody>
+</table>
+
+<script>
+  document.getElementById('searchInput').addEventListener('keyup', function () {
+    const searchValue = this.value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+      const rowText = row.innerText.toLowerCase();
+      row.style.display = rowText.includes(searchValue) ? '' : 'none';
+    });
+  });
+  function toggleAppointments(id) {
+    const el = document.getElementById("appointments" + id);
+    el.classList.toggle("d-none");
+  }
+
+</script>
+
+{% endblock %}
