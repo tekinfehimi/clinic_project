@@ -8,16 +8,14 @@ from datetime import date
 from .utils import generate_invoice_pdf 
 from .models import *
 
-from django.contrib.auth.models import User
-from django.http import HttpResponse
+# from django.contrib.auth.models import User
+# from django.http import HttpResponse
 
-def create_admin(request):
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', 'admin1234')
-        return HttpResponse("Admin yaradıldı")
-    return HttpResponse("Artıq mövcuddur")
-
-
+# def create_admin(request):
+#     if not User.objects.filter(username='admin').exists():
+#         User.objects.create_superuser('admin', 'admin@example.com', 'admin1234')
+#         return HttpResponse("Admin yaradıldı")
+#     return HttpResponse("Artıq mövcuddur")
 
 # Create your views here.
 def index(request):

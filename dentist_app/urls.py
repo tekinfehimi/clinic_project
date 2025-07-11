@@ -17,9 +17,7 @@ urlpatterns = [
     path('services/add/', views.add_service, name='add-service'),
     path('queue/', views.queue_list, name='queue-list'),
     path('queue/complete/<int:appointment_id>/', views.complete_appointment, name='complete-appointment'),
-    path('create-admin/', views.create_admin),
-
-
+    # path('create-admin/', views.create_admin),
 
     # search in create appointment form
     path('patient-autocomplete/', PatientAutocomplete.as_view(), name='patient-autocomplete'),
