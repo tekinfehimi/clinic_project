@@ -28,7 +28,7 @@ SECRET_KEY = '@wn3%fij17a87s39=-w%i2v*xuwskdyok!xyi%(*1!p_vjtkr-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['medxdent.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
