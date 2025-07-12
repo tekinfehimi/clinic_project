@@ -8,7 +8,8 @@ from datetime import date
 from .utils import generate_invoice_pdf 
 from .models import *
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth import views as auth_views
+from .forms import CustomAuthenticationForm
 
 # from django.contrib.auth.models import User
 # from django.http import HttpResponse
@@ -20,6 +21,12 @@ from django.contrib.auth.decorators import login_required
 #     return HttpResponse("Artıq mövcuddur")
 
 # Create your views here.
+
+
+
+class CustomLoginView(auth_views.LoginView):
+    authentication_form = CustomAuthenticationForm
+
 @login_required
 def index(request):
     return render(request, "base.html")

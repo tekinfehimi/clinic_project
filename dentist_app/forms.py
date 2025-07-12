@@ -2,7 +2,16 @@
 from django import forms
 from dal import autocomplete
 from .models import Appointment, Patient, Service
+from django.contrib.auth.forms import AuthenticationForm
 
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'İstifadəçi adı', 'class': 'form-control'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'placeholder': 'Parol', 'class': 'form-control'})
+    )
+    
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
