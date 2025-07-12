@@ -51,13 +51,14 @@ def generate_invoice_pdf(appointment):
         left = i * section_width + margin
         top = height - 40 * mm
 
-        
+        # Başlıq
         c.setFont('DejaVuSans-Bold', 28)
         c.drawString(left, top + 5 * mm, "MedXDent")
 
         label_x = left
         value_x = left + 30 * mm
 
+        # Etiketlər
         c.setFont('DejaVuSans-Bold', 16)
         c.drawString(label_x, top - 30 * mm, "Həkim:")
         c.drawString(label_x, top - 45 * mm, "Xidmət:")
@@ -65,6 +66,7 @@ def generate_invoice_pdf(appointment):
         c.drawString(label_x, top - 95 * mm, "Tarix:")
         c.drawString(label_x, top - 110 * mm, "Məbləğ:")
 
+        # Məlumatlar
         c.setFont('DejaVuSans', 16)
         c.drawString(value_x, top - 30 * mm, str(appointment.doctor))
         c.drawString(value_x, top - 80 * mm, str(appointment.patient))
@@ -83,6 +85,13 @@ def generate_invoice_pdf(appointment):
 
         c.setFont('DejaVuSans-Bold', 16)
         c.drawString(left, 35 * mm, "İmza:")
+
+        # 🔽 Araya qara xətt (yalnız 1-ci və 2-ci nüsxədən sonra)
+        if i < 2:
+            x_cut = (i + 1) * section_width
+            c.setStrokeColorRGB(0, 0, 0)  # qara rəng
+            c.setLineWidth(1)
+            c.line(x_cut, 15 * mm, x_cut, height - 15 * mm)
 
     c.showPage()
     c.save()
