@@ -56,7 +56,6 @@ def create_appointment(request):
     return render(request, 'create_appointment.html', {'form': form})
 
 # Yeni görüş yadılma formunda xəstə, həkim, xidmət axtarışı üçün
-@login_required
 class PatientAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Patient.objects.all()
@@ -69,7 +68,7 @@ class PatientAutocomplete(autocomplete.Select2QuerySetView):
                 fin_code__icontains=self.q
             )
         return qs
-@login_required
+    
 class DoctorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Doctor.objects.all()
@@ -77,7 +76,7 @@ class DoctorAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(full_name__icontains=self.q)
         return qs
 
-@login_required
+
 class ServiceAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Service.objects.all()
