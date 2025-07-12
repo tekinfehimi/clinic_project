@@ -1,5 +1,6 @@
 from django.conf.urls import include
 from django.urls import re_path as url
+from django.shortcuts import redirect
 from django.urls import path
 from . import views
 from django.views.decorators.csrf import csrf_exempt
@@ -7,7 +8,8 @@ from dentist_app.views import PatientAutocomplete, DoctorAutocomplete, ServiceAu
 
 urlpatterns = [
 
-    url(r'^$', views.index, name='index'),
+    # url(r'^$', views.index, name='index'),
+    path('', lambda request: redirect('login/')),
     url(r'^patients/$', views.patient_list, name='patient-list'),
     path('appointments/', views.appointment_list, name='appointment-list'),
     path('appointments/create/', views.create_appointment, name='appointment-create'),
