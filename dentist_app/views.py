@@ -7,6 +7,8 @@ from django.db.models import Sum, Count, Q
 from datetime import date
 from .utils import generate_invoice_pdf 
 from .models import *
+from django.contrib.auth.decorators import login_required
+
 
 # from django.contrib.auth.models import User
 # from django.http import HttpResponse
@@ -18,9 +20,11 @@ from .models import *
 #     return HttpResponse("Artıq mövcuddur")
 
 # Create your views here.
+@login_required
 def index(request):
     return render(request, "base.html")
 
+@login_required
 def patient_list(request):
     patients = Patient.objects.all()
     context = {
@@ -28,10 +32,12 @@ def patient_list(request):
     }
     return render(request, "patients.html", context=context)
 
+@login_required
 def appointment_list(request):
     appointments = Appointment.objects.select_related('patient', 'doctor', 'service').order_by('-appointment_date', '-appointment_time')
     return render(request, 'appointments.html', {'appointments': appointments})
 
+@login_required
 def create_appointment(request):
     if request.method == 'POST':
         form = AppointmentForm(request.POST)
@@ -50,6 +56,7 @@ def create_appointment(request):
     return render(request, 'create_appointment.html', {'form': form})
 
 # Yeni görüş yadılma formunda xəstə, həkim, xidmət axtarışı üçün
+@login_required
 class PatientAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Patient.objects.all()
@@ -62,7 +69,7 @@ class PatientAutocomplete(autocomplete.Select2QuerySetView):
                 fin_code__icontains=self.q
             )
         return qs
-
+@login_required
 class DoctorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Doctor.objects.all()
@@ -70,6 +77,7 @@ class DoctorAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(full_name__icontains=self.q)
         return qs
 
+@login_required
 class ServiceAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Service.objects.all()
@@ -77,7 +85,7 @@ class ServiceAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__icontains=self.q)
         return qs
 # axtarışın sonu
-
+@login_required
 def doctor_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -112,6 +120,7 @@ def doctor_report(request):
         'end_date': end_date,
     })
 
+@login_required
 def add_patient(request):
     if request.method == 'POST':
         form = PatientForm(request.POST)
@@ -124,10 +133,12 @@ def add_patient(request):
     
     return render(request, 'add_patient.html', {'form': form})
 
+@login_required
 def service_list(request):
     services = Service.objects.all().order_by('-id')
     return render(request, 'services.html', {'services': services})
 
+@login_required
 def add_service(request):
     if request.method == 'POST':
         form = ServiceForm(request.POST)
@@ -138,6 +149,7 @@ def add_service(request):
         form = ServiceForm()
     return render(request, 'add_service.html', {'form': form, 'title': 'Yeni Xidmət Əlavə Et'})
 
+@login_required
 def queue_list(request):
     today = timezone.localdate()  # bu günün tarixi
     queue = Appointment.objects.filter(
@@ -147,6 +159,7 @@ def queue_list(request):
 
     return render(request, 'queue_list.html', {'queue': queue})
 
+@login_required
 def complete_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id)
     appointment.is_completed = True
