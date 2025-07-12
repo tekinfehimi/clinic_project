@@ -5,14 +5,25 @@
   <title>Login</title>
 </head>
 <body>
-  <h2>Giriş</h2>
-  {% if form.errors %}
-    <p style="color: red;">İstifadəçi adı və ya şifrə yalnışdır</p>
-  {% endif %}
-  <form method="post">
+{{ form.media }}
+<div class="container mt-5" style="max-width: 600px;">
+  <h2 class="mb-4">Sistemə daxil ol</h2>
+  <form method="post" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Daxil ol</button>
+    {% for field in form %}
+      <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {{ field|add_class:"form-control" }}
+        {% if field.help_text %}
+          <div class="form-text">{{ field.help_text }}</div>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Yadda saxla</button>
   </form>
+</div>
 </body>
 </html>
