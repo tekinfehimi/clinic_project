@@ -34,7 +34,7 @@
       <td>{{ app.service.detail }}</td>
       <td>{{ app.appointment_date|date:"d.m.Y" }}
       {{ app.appointment_time|time:"H:i" }}</td>
-      <td>{{ app.service.price }}/{{ app.paid_amount|default:"–" }}₼</td>
+      <td>{{ app.service.price }}/{{ app.paid_amount|default:"0.0" }}₼</td>
       <td class="text-center">
         {% if app.is_completed %}
             <i class="fas fa-check-square text-success fs-5" title="Tamamlanıb"></i>
@@ -44,7 +44,7 @@
       </td>
       <td>
         {% if app.qaime %}
-          <a href="{{ app.qaime.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Yüklə</a>
+          <a href="{% url 'render_invoice' app.id %}" class="btn btn-sm btn-outline-primary" target="_blank">Yüklə</a>
         {% else %}
           <span class="text-muted small">Yoxdur</span>
         {% endif %}

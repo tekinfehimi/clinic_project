@@ -10,6 +10,107 @@ from .models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 from .forms import CustomAuthenticationForm
+from django.urls import reverse_lazy
+from django.http import HttpResponse, Http404
+from reportlab.pdfgen import canvas
+from django.conf import settings
+import io
+import os
+from .models import Appointment
+from reportlab.lib.pagesizes import landscape, A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.units import mm
+from .utils import split_text_words
+
+def generate_invoice_response(request, appointment_id):
+    try:
+        appointment = Appointment.objects.get(pk=appointment_id)
+    except Appointment.DoesNotExist:
+        raise Http404("Görüş tapılmadı")
+
+    buffer = io.BytesIO()
+
+    font_regular_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'DejaVuSans.ttf')
+    font_bold_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'DejaVuSans-Bold.ttf')
+
+    pdfmetrics.registerFont(TTFont('DejaVuSans', font_regular_path))
+    pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', font_bold_path))
+
+    c = canvas.Canvas(buffer, pagesize=landscape(A4))
+    width, height = landscape(A4)
+    section_width = width / 3
+    margin = 10 * mm
+    text_max_width = section_width - 2 * margin - 20 * mm
+
+
+    for i in range(3):
+        left = i * section_width + margin
+        top = height - 40 * mm
+        
+
+        logo_width = 70 * mm
+        logo_height = 45 * mm
+        logo_x = left + (section_width - logo_width) / 2 - 30
+        logo_y = top -5 * mm
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.png')
+        c.drawImage(logo_path, logo_x, logo_y, width=logo_width, height=logo_height, mask='auto')
+
+
+        # c.setFont('DejaVuSans-Bold', 28)
+        # c.drawString(left, top + 5 * mm, "MedXDent")
+        top = logo_y + 10*mm
+        label_x = left
+        value_x = left + 30 * mm
+
+        c.setFont('DejaVuSans-Bold', 16)
+        c.drawString(label_x, top - 30 * mm, "Pasiyent:")
+        c.drawString(label_x, top - 45 * mm, "Xidmət:")
+
+        c.setFont('DejaVuSans', 16)
+        c.drawString(value_x, top - 30 * mm, str(appointment.patient))
+
+        # Xidmət çox sətrə düşəndə
+        service_lines = split_text_words(appointment.service.name, text_max_width, 'DejaVuSans', 14)
+        y_pos = top - 45 * mm
+        line_height = 20
+        for idx, line in enumerate(service_lines):
+            c.drawString(value_x , y_pos - idx * line_height, line )
+
+        service_block_height = len(service_lines) * line_height
+        patient_y = y_pos - service_block_height - 25
+        date_y = patient_y - 30
+        amount_y = date_y - 30
+
+        c.setFont('DejaVuSans-Bold', 16)
+        c.drawString(label_x, patient_y, "Həkim:")
+        c.drawString(label_x, date_y, "Tarix:")
+        c.drawString(label_x, amount_y, "Məbləğ:")
+
+        c.setFont('DejaVuSans', 16)
+        c.drawString(value_x, patient_y, str(appointment.doctor))
+
+        date_str = appointment.appointment_date.strftime('%d.%m.%Y')
+        time_str = appointment.appointment_time.strftime('%H:%M') if hasattr(appointment, 'appointment_time') and appointment.appointment_time else ''
+        datetime_str = f"{date_str} {time_str}".strip()
+        c.drawString(value_x, date_y, datetime_str)
+
+        c.drawString(value_x, amount_y, f"{appointment.paid_amount} AZN")
+
+        c.setFont('DejaVuSans-Bold', 16)
+        c.drawString(left, 35 * mm, "İmza:")
+
+        if i < 2:
+            x_cut = (i + 1) * section_width
+            c.setLineWidth(1)
+            c.line(x_cut, 15 * mm, x_cut, height - 15)
+
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+
+    return HttpResponse(buffer, content_type='application/pdf')
+
 
 # from django.contrib.auth.models import User
 # from django.http import HttpResponse
@@ -20,12 +121,12 @@ from .forms import CustomAuthenticationForm
 #         return HttpResponse("Admin yaradıldı")
 #     return HttpResponse("Artıq mövcuddur")
 
-# Create your views here.
-
-
 
 class CustomLoginView(auth_views.LoginView):
     authentication_form = CustomAuthenticationForm
+    template_name = 'login.html'
+    success_url = reverse_lazy('service-list')
+
 
 @login_required
 def index(request):

@@ -27,10 +27,10 @@ TEMPLATE_DIRS = [
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '@wn3%fij17a87s39=-w%i2v*xuwskdyok!xyi%(*1!p_vjtkr-'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['medxdent.onrender.com', 'localhost', '127.0.0.1']
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+if not DEBUG:
+    ALLOWED_HOSTS = ['medxdent.onrender.com']
 
 
 # Application definition
@@ -100,11 +100,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #         'PORT': '5432',
 #     }
 # }
-DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-}
-
-
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
 
 
 # Password validation
