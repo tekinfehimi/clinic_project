@@ -17,8 +17,18 @@ urlpatterns = [
     path('patients/add/', views.add_patient, name='add-patient'),
     path('services/', views.service_list, name='service-list'),
     path('services/add/', views.add_service, name='add-service'),
-    path('queue/', views.queue_list, name='queue-list'),
+    path('appointments/session/<int:appointment_id>/', views.add_session, name='add-session'),
     path('queue/complete/<int:appointment_id>/', views.complete_appointment, name='complete-appointment'),
+    path('appointments/<int:appointment_id>/edit/', views.edit_appointment, name='edit-appointment'),
+    path('complete-session/<int:pk>/', views.complete_session, name='complete-session'),
+    path('sessions/<int:pk>/edit/', views.edit_session, name='edit-session'),
+    path('appointment/<int:pk>/edit/in-queue/', views.edit_session, name='edit-app-in-queue'),
+
+
+
+
+    path('queue/', views.queue_list, name='queue-list'),
+    # path('queue/complete/<int:appointment_id>/', views.complete_appointment, name='complete-appointment'),
     path('invoice/render/<int:appointment_id>/', views.generate_invoice_response, name='render_invoice'),
 
     # path('create-admin/', views.create_admin),

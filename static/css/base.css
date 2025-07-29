@@ -54,12 +54,12 @@ body {
     overflow: hidden;
 }
 .sidebar-logo {
-    width: 150px;     /* daha kiçik üçün 80px, daha böyük üçün 150px */
+    width: 100%;              /* sidebar qədər en */
     height: auto;
     object-fit: contain;
-    margin: 0 auto;
+         /* 100px yuxarıdan boşluq */
     display: block;
-    border-radius: 15px;
+    border-radius: 5px;
 }
 .sidebar-link:hover {
     /* color: #ffffff;

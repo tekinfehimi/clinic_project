@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import AppointmentForm, PatientForm, ServiceForm
+from .forms import AppointmentForm, PatientForm, ServiceForm, AppointmentSessionForm
 from django.utils import timezone
 from dal import autocomplete
 from django.db.models import Sum, Count, Q
 from datetime import date
+from collections import defaultdict, OrderedDict
 from .utils import generate_invoice_pdf 
 from .models import *
 from django.contrib.auth.decorators import login_required
@@ -21,6 +22,7 @@ from reportlab.lib.pagesizes import landscape, A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.units import mm
+from django.db.models import Exists, OuterRef
 from .utils import split_text_words
 
 def generate_invoice_response(request, appointment_id):
@@ -140,10 +142,16 @@ def patient_list(request):
     }
     return render(request, "patients.html", context=context)
 
+
+# def appointment_list(request):
+#     appointments = Appointment.objects.select_related('patient', 'doctor', 'service').order_by('-appointment_date', '-appointment_time')
+#     return render(request, 'appointments.html', {'appointments': appointments})
+
 @login_required
 def appointment_list(request):
-    appointments = Appointment.objects.select_related('patient', 'doctor', 'service').order_by('-appointment_date', '-appointment_time')
+    appointments = Appointment.objects.prefetch_related('sessions').select_related('patient', 'doctor', 'service')
     return render(request, 'appointments.html', {'appointments': appointments})
+
 
 @login_required
 def create_appointment(request):
@@ -151,17 +159,64 @@ def create_appointment(request):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             appointment = form.save(commit=False)
-            if appointment.paid_amount:
-                # if appointment.paid_amount >= appointment.service.price:
-                #     appointment.is_completed = True
-                appointment.paid_date = timezone.now()
-                pdf_path = generate_invoice_pdf(appointment)
-                appointment.qaime.name = pdf_path
+            if not appointment.paid_amount:
+                appointment.paid_amount = 0.0
             appointment.save()
+
+            AppointmentSession.objects.create(
+                appointment=appointment,
+                session_date=appointment.appointment_date,
+                session_time=appointment.appointment_time
+            )
+
             return redirect('appointment-list')
     else:
         form = AppointmentForm()
     return render(request, 'create_appointment.html', {'form': form})
+
+@login_required
+def edit_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            appointment.sessions.filter(is_active=True).update(is_active=False)
+            AppointmentSession.objects.create(
+                appointment=appointment,
+                session_date=appointment.appointment_date,
+                session_time=appointment.appointment_time,
+                is_active=True
+            )
+
+            return redirect('appointment-list')
+    else:
+        form = AppointmentForm(instance=appointment)
+
+    return render(request, 'create_appointment.html', {
+        'form': form,
+        'appointment': appointment
+    })
+
+
+
+def edit_appoint_in_queue(request, app_id):
+    appointment = get_object_or_404(Appointment, id=app_id)
+    session = get_object_or_404(AppointmentSession, pk=appointment.id)
+    if request.method == 'POST':
+        form = AppointmentSessionForm(request.POST, instance=session)
+        if form.is_valid():
+            form.save()
+            return redirect('queue-list')
+    else:
+        form = AppointmentSessionForm(instance=session)
+
+    return render(request, 'edit_session.html', {'form': form, 'session': session})
+    
+
+
+
 
 # Yeni görüş yadılma formunda xəstə, həkim, xidmət axtarışı üçün
 class PatientAutocomplete(autocomplete.Select2QuerySetView):
@@ -257,14 +312,75 @@ def add_service(request):
     return render(request, 'add_service.html', {'form': form, 'title': 'Yeni Xidmət Əlavə Et'})
 
 @login_required
+@login_required
 def queue_list(request):
-    today = timezone.localdate()  # bu günün tarixi
-    queue = Appointment.objects.filter(
-        appointment_date=today,
-        is_completed=False
-    ).order_by('appointment_time')
+    today = timezone.localdate()
+    sessions = AppointmentSession.objects.filter(
+        is_completed=False,
+        is_active=True,
+        session_date__gte=today
+    ).select_related('appointment__patient', 'appointment__doctor', 'appointment__service') \
+     .order_by('session_date', 'session_time')
 
-    return render(request, 'queue_list.html', {'queue': queue})
+    grouped_queue = defaultdict(list)
+    for session in sessions:
+        appointment = session.appointment
+        grouped_queue[session.session_date].append({
+            'id': session.id,
+            'patient': appointment.patient,
+            'doctor': appointment.doctor,
+            'service': appointment.service,
+            'time': session.session_time,
+            'type': 'session'
+        })
+
+    grouped_queue = dict(sorted(grouped_queue.items()))
+
+    return render(request, 'queue_list.html', {'grouped_queue': grouped_queue})
+
+
+# @login_required
+# def complete_appointment(request, appointment_id):
+#     appointment = get_object_or_404(Appointment, id=appointment_id)
+#     if request.method == 'POST':
+#         action = request.POST.get('action')
+#         if action == 'complete':
+#             appointment.is_completed = True
+#             appointment.save()
+#     return redirect('queue-list')
+
+    #     elif action == 'continue':
+    #         return redirect('add-session', appointment_id=appointment.id)
+
+    # return render(request, 'confirm_complete.html', {'appointment': appointment})
+
+@login_required
+def add_session(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST':
+        form = AppointmentSessionForm(request.POST)
+        if form.is_valid():
+            session = form.save(commit=False)
+            session.appointment = appointment
+            session.save()
+            return redirect('queue-list') 
+    else:
+        form = AppointmentSessionForm()
+
+    return render(request, 'add_session.html', {'form': form, 'appointment': appointment})
+
+@login_required
+def complete_session(request, pk):
+    session = get_object_or_404(AppointmentSession, pk=pk)
+    if request.method == 'POST':
+        session.is_completed = True 
+        session.is_active = False
+        session.save()
+
+        appointment = session.appointment
+        appointment.is_completed = True
+        appointment.save()
+    return redirect('queue-list')
 
 @login_required
 def complete_appointment(request, appointment_id):
@@ -272,3 +388,35 @@ def complete_appointment(request, appointment_id):
     appointment.is_completed = True
     appointment.save()
     return redirect('queue-list')
+
+@login_required
+def edit_session(request, pk):
+    old_session = get_object_or_404(AppointmentSession, pk=pk)
+
+    if request.method == 'POST':
+        form = AppointmentSessionForm(request.POST)
+        if form.is_valid():
+            # Köhnə session-u deaktiv edirik
+            old_session.is_active = False
+            old_session.save()
+
+            # Yeni session yarat
+            new_session = form.save(commit=False)
+            new_session.appointment = old_session.appointment  # əlaqəni saxla
+            new_session.is_active = True
+            new_session.save()
+
+            return redirect('queue-list')
+    else:
+        # Formu əvvəlki session məlumatları ilə doldur (instance istifadə etmə!)
+        form = AppointmentSessionForm(initial={
+            'session_date': old_session.session_date,
+            'session_time': old_session.session_time,
+            'notes': old_session.notes,
+            'is_completed': old_session.is_completed,
+        })
+
+    return render(request, 'edit_session.html', {
+        'form': form,
+        'session': old_session,
+    })

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Xidmət tamamlandı?</h3>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" name="action" value="complete" class="btn btn-success">Bəli</button>
+  <button type="submit" name="action" value="continue" class="btn btn-warning">Xeyr, növbəti seansı təyin et</button>
+</form>
+<a href="{% url 'queue-list' %}" class="btn btn-secondary mt-3">Geri</a>
+{% endblock %}

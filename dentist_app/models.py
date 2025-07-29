@@ -75,3 +75,15 @@ class DoctorEarnings(models.Model):
 
     def __str__(self):
         return f"{self.doctor} - {self.date} - {self.total_earnings}"
+
+class AppointmentSession(models.Model):
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='sessions')
+    session_date = models.DateField()
+    session_time = models.TimeField()
+    notes = models.TextField(blank=True)
+    is_completed = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.appointment.patient} - {self.session_date} {self.session_time}"

@@ -1,7 +1,7 @@
 # forms.py
 from django import forms
 from dal import autocomplete
-from .models import Appointment, Patient, Service
+from .models import Appointment, Patient, Service, AppointmentSession
 from django.contrib.auth.forms import AuthenticationForm
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -69,14 +69,12 @@ class ServiceForm(forms.ModelForm):
 
         }
 
-# class AppointmentForm(forms.ModelForm):
-#     class Meta:
-#         model = Appointment
-#         fields = ['patient', 'doctor', 'service', 'appointment_date', 'appointment_time', 'paid_amount']
-#         widgets = {
-#             'patient': autocomplete.ModelSelect2(url='patient-autocomplete'),
-#             'doctor': autocomplete.ModelSelect2(url='doctor-autocomplete'),
-#             'service': autocomplete.ModelSelect2(url='service-autocomplete'),
-#             'appointment_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-#             'appointment_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-#         }
+class AppointmentSessionForm(forms.ModelForm):
+    class Meta:
+        model = AppointmentSession
+        fields = ['session_date', 'session_time', 'notes']
+        widgets = {
+            'session_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'session_time': forms.TimeInput(attrs={'class': 'form-control timepicker-session', 'type': 'text'}),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }

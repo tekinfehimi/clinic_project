@@ -1,39 +1,54 @@
 {% extends 'base.html' %}
 {% block active_queue %}active{% endblock %}
 {% block content %}
+
 <h2>Növbə</h2>
-<br><br>
-<table class="table align-middle mb-0 bg-white">
-  <thead class="bg-light">
-    <tr>
-      <th></th>
-      <th>Pasiyent</th>
-      <th>Həkim</th>
-      <th>Xidmət</th>
-      <th>Saat</th>
-      <th>Əməliyyat</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for app in queue %}
-    <tr>
-      <td>{{ forloop.counter }}.</td>
-      <td><strong>{{ app.patient.first_name }} {{ app.patient.last_name }}</strong></td>
-      <td>{{ app.doctor.first_name }} {{ app.doctor.last_name }}</td>
-      <td>{{ app.service.name }}</td>
-      <td>{{ app.appointment_time|date:"H:i" }}</td>
-      <td>
-        <form method="post" action="{% url 'complete-appointment' app.id %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-success btn-sm">Növbədən çıxar</button>
-        </form>
-      </td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="6" class="text-center">Bu gün üçün növbə yoxdur.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<br>
+
+{% for date, items in grouped_queue.items %}
+  <h5 class="mt-5">
+    <i class="fas fa-calendar-alt text-danger"></i> {{ date|date:"d.m.Y" }}
+  </h5>
+
+  <table class="table align-middle mb-0 bg-white">
+    <thead class="bg-light">
+      <tr>
+        <th>#</th>
+        <th>Pasiyent</th>
+        <th>Həkim</th>
+        <th>Xidmət</th>
+        <th>Saat</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ item.patient.first_name }} {{ item.patient.last_name }}</td>
+          <td>{{ item.doctor.first_name }} {{ item.doctor.last_name }}</td>
+          <td>{{ item.service.name }}</td>
+          <td>{{ item.time|time:"H:i" }}</td>
+          <td>
+            <a href="{% url 'edit-session' item.id %}">
+              <button class="btn btn-outline-warning btn-sm">Dəyiş</button>
+            </a>
+          </td>
+          <td>
+            <form action="{% url 'complete-session' item.id %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">Çıxar</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+
+{% if grouped_queue|length == 0 %}
+  <div class="text-center text-muted">Növbə yoxdur.</div>
+{% endif %}
+
 {% endblock %}

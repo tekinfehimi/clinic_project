@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Seansın Yeni Versiyasını Yarat</h2>
+  <p><strong>Qeyd:</strong> Bu formu doldurduqda köhnə seans deaktiv ediləcək və onun əvəzinə yeni bir seans yaradılacaq.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <button type="submit" class="btn btn-success">Yeni Seansı Yarat</button>
+    <a href="{% url 'queue-list' %}" class="btn btn-secondary">Ləğv et</a>
+  </form>
+{% endblock %}

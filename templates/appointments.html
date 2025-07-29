@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block active_appointments %}active{% endblock %}
 {% block content %}
+
 <h2>Görüşlər siyahısı</h2>
 
 <div class="mb-3">
@@ -21,39 +22,54 @@
       <th>Ödəniş</th>
       <th>Status</th>
       <th>Qaimə</th>
-      <!-- <th></th> -->
+      <th></th>
     </tr>
   </thead>
   <tbody>
-    {% for app in appointments %}
+  {% for app in appointments %}
     <tr>
       <td>{{ forloop.counter }}.</td>
       <td><strong>{{ app.patient.first_name }} {{ app.patient.last_name }}</strong></td>
       <td>{{ app.doctor.first_name }} {{ app.doctor.last_name }}</td>
       <td>{{ app.service.name }}</td>
-      <td>{{ app.service.detail }}</td>
-      <td>{{ app.appointment_date|date:"d.m.Y" }}
-      {{ app.appointment_time|time:"H:i" }}</td>
-      <td>{{ app.service.price }}/{{ app.paid_amount|default:"0.0" }}₼</td>
+      <td>{{ app.service.detail|default:"-" }}</td>
+      <td>
+        <div>
+          <div class="btn-group ms-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ app.appointment_date|date:"d.m.Y" }} {{ app.appointment_time|time:"H:i" }}
+            </button>
+          {% if app.sessions.all %}
+          
+            <ul class="dropdown-menu">
+              {% for sess in app.sessions.all %}
+                <li>
+                  <span class="dropdown-item">
+                    ➤ {{ sess.session_date|date:"d.m.Y" }} {{ sess.session_time|time:"H:i" }}
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </td>
+      <td>{{ app.service.price }}/{{ app.paid_amount|default:"0.0" }} AZN</td>
       <td class="text-center">
         {% if app.is_completed %}
-            <i class="fas fa-check-square text-success fs-5" title="Tamamlanıb"></i>
+          <i class="fas fa-check-square text-success fs-5" title="Tamamlanıb"></i>
         {% else %}
-            <i class="fas fa-square-xmark text-danger fs-5" title="Tamamlanmayıb"></i>
+          <i class="fas fa-square-xmark text-danger fs-5" title="Tamamlanmayıb"></i>
         {% endif %}
       </td>
       <td>
-        {% if app.qaime %}
-          <a href="{% url 'render_invoice' app.id %}" class="btn btn-sm btn-outline-primary" target="_blank">Yüklə</a>
-        {% else %}
-          <span class="text-muted small">Yoxdur</span>
-        {% endif %}
+        <a href="{% url 'render_invoice' app.id %}" class="btn btn-sm btn-outline-primary" target="_blank">Yüklə</a>
       </td>
-      <!-- <td>
-        <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
-      </td> -->
+      <td>
+        <a href="{% url 'edit-appointment' app.id %}" class="btn btn-sm btn-outline-warning">Dəyiş</a>
+      </td>
     </tr>
-    {% endfor %}
+  {% endfor %}
   </tbody>
 </table>
 
@@ -68,4 +84,5 @@
     });
   });
 </script>
+
 {% endblock %}
