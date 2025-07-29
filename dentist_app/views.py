@@ -181,14 +181,20 @@ def edit_appointment(request, appointment_id):
     if request.method == 'POST':
         form = AppointmentForm(request.POST, instance=appointment)
         if form.is_valid():
-            form.save()
-            appointment.sessions.filter(is_active=True).update(is_active=False)
-            AppointmentSession.objects.create(
-                appointment=appointment,
-                session_date=appointment.appointment_date,
-                session_time=appointment.appointment_time,
-                is_active=True
-            )
+            old_date = appointment.appointment_date
+            old_time = appointment.appointment_time
+
+            updated_appointment = form.save(commit=False)
+            if old_date != updated_appointment.appointment_date or old_time != updated_appointment.appointment_time:
+                appointment.sessions.filter(is_active=True).update(is_active=False)
+
+                AppointmentSession.objects.create(
+                    appointment=appointment,
+                    session_date=updated_appointment.appointment_date,
+                    session_time=updated_appointment.appointment_time,
+                    is_active=True
+                )
+            updated_appointment.save()
 
             return redirect('appointment-list')
     else:
